@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U Day - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'home/home.css' %}">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ================= LEFT SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <!-- LOGO IMAGE TAG -->
+                <img src="{% static 'logo.png' %}" alt="U Day Logo" class="logo-img">
+                <h1>U Day</h1>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fas fa-home"></i> Home</a>
+                <a href="{% url 'create_post' %}" class="nav-item"><i class="fas fa-pen-fancy"></i> Create Post</a>
+                <a href="#" class="nav-item"><i class="far fa-file-alt"></i> My Posts</a>
+                <a href="#" class="nav-item"><i class="far fa-bookmark"></i> Saved Posts</a>
+                <a href="#" class="nav-item"><i class="fas fa-shield-alt"></i> Privacy Center</a>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+                <a href="{% url 'logout' %}" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- ================= MIDDLE FEED ================= -->
+        <main class="main-feed">
+            <!-- Top Navigation Bar -->
+            <header class="top-nav">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search posts, people...">
+                </div>
+                <div class="nav-icons">
+                    <i class="fas fa-home active"></i>
+                    <i class="far fa-user"></i>
+                    <i class="far fa-bell"></i>
+                    <i class="far fa-comment-dots"></i>
+                    
+                    <div class="user-profile-mini">
+                        <!-- LOGGED IN USER PROFILE IMAGE -->
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.full_name }}" class="mini-avatar">
+                        {% else %}
+                        <div class="mini-avatar avatar-fallback">{{ user.full_name|first|upper }}</div>
+                        {% endif %}
+                        <span class="profile-greeting">Hi, {{ user.full_name }} <i class="fas fa-chevron-down"></i></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Create Post Card -->
+            <div class="card create-post-card">
+                <div class="card-header">
+                    <!-- CURRENT USER AVATAR -->
+                    {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="{{ user.full_name }}" class="avatar-small">
+                    {% else %}
+                    <div class="avatar-small avatar-fallback">{{ user.full_name|first|upper }}</div>
+                    {% endif %}
+                    <h4>Create a Post</h4>
+                </div>
+                <div class="create-post-input">
+                    <input type="text" placeholder="What's on your mind, {{ user.full_name }}?">
+                </div>
+                <div class="create-post-actions">
+                    <div class="action-btn"><i class="fas fa-image" style="color:#4CAF50;"></i> Photo / Video</div>
+                    <div class="action-btn"><i class="fas fa-map-marker-alt" style="color:#F44336;"></i> Add Location</div>
+                    <div class="action-btn"><i class="far fa-smile" style="color:#FFC107;"></i> Feeling / Activity</div>
+                    <div class="action-right">
+                        <div class="privacy-select"><i class="fas fa-globe"></i> Public <i class="fas fa-chevron-down"></i></div>
+                        <button class="btn-post" ><a href="{% url 'create_post' %}">Post</a></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed Posts -->
+            <div id="feedContainer">
+                {% for post in posts %}
+                <div class="card post-card">
+                    <div class="post-header">
+                        <div class="post-user">
+                            {% if post.author.profile_picture %}
+                            <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.full_name }}" class="avatar-medium">
+                            {% else %}
+                            <div class="avatar-medium avatar-fallback">{{ post.author.full_name|first|upper }}</div>
+                            {% endif %}
+                            <div>
+                                <h4 class="user-name">{{ post.author.full_name }}</h4>
+                                <span class="post-meta">{{ post.created_at|timesince }} ago <span class="dot">•</span> <i class="fas fa-globe"></i> {{ post.privacy }} <span class="dot">•</span> {% if post.moderation_status == "Allowed" %}<span style="color:#2e7d32; font-weight:600;"><i class="fas fa-shield-alt"></i> Safe</span>{% elif post.moderation_status == "Flagged for Review" %}<span style="color:#d97706; font-weight:600;"><i class="fas fa-clock"></i> In Review</span>{% endif %}</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-ellipsis-h post-options"></i>
+                    </div>
+                    
+                    <div class="post-content">
+                        <p>{{ post.content|linebreaksbr }}</p>
+                        {% if post.image %}
+                        <div class="post-image-wrapper">
+                            <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
+                        </div>
+                        {% elif post.video %}
+                        <div class="post-image-wrapper">
+                            <video src="{{ post.video.url }}" class="post-image" controls preload="metadata"></video>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="post-stats">
+                        <div class="reactions">
+                            <i class="fas fa-thumbs-up" style="color:#1877F2;"></i>
+                            <i class="fas fa-heart" style="color:#F34242;"></i>
+                            <i class="fas fa-face-smile" style="color:#F7B928;"></i>
+                            <span class="reaction-count">{{ post.likes }}</span>
+                        </div>
+                        <div class="stats-right">
+                            <span>{{ post.comments }} Comments</span>
+                            <span class="dot">•</span>
+                            <span>{{ post.shares }} Shares</span>
+                        </div>
+                    </div>
+
+                    <div class="post-actions">
+                        <div class="action-item"><i class="far fa-thumbs-up"></i> Like</div>
+                        <div class="action-item"><i class="far fa-comment-alt"></i> Comment</div>
+                        <div class="action-item"><i class="fas fa-share"></i> Share</div>
+                        <div class="action-item"><i class="far fa-bookmark"></i> Save</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="card" style="text-align:center; padding: 40px; color:#777;">
+                    <p>No posts to show yet. Be the first to share!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+
+        <!-- ================= RIGHT SIDEBAR ================= -->
+        <aside class="right-sidebar">
+            
+            <!-- Welcome Card -->
+            <div class="card welcome-card">
+                <h4>Welcome, {{ user.full_name }} 👋</h4>
+                <p>Here's your activity summary</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-box purple"><span id="postCount">{{ stats.post_count }}</span><br>Posts</div>
+                    <div class="stat-box blue"><span id="followerCount">{{ stats.follower_count }}</span><br>Followers</div>
+                    <div class="stat-box green"><span id="followingCount">{{ stats.following_count }}</span><br>Following</div>
+                </div>
+            </div>
+
+            <!-- Privacy Score Card -->
+            <div class="card privacy-score-card">
+                <div class="card-title-row">
+                    <div class="title-with-icon"><i class="fas fa-shield-alt" style="color:#5841f5;"></i> Your Privacy Score</div>
+                    <span class="badge-good">Good</span>
+                </div>
+                
+                <div class="score-circle-wrapper">
+                    <div class="score-circle" id="privacyScoreCircle">
+                        <span id="privacyScoreText">{{ privacy_score }}</span>
+                        <span class="out-of">/100</span>
+                    </div>
+                </div>
+                
+                <p class="score-message">You're doing great!</p>
+                <p class="score-desc">U Day helps you protect your personal information before you share.</p>
+                <a href="#" class="link-primary">Go to Privacy Center <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <!-- Privacy Tip Card -->
+            <div class="card privacy-tip-card">
+                <div class="card-title-row">
+                    <div class="title-with-icon"><i class="fas fa-lightbulb" style="color:#5841f5;"></i> Privacy Tip of the Day</div>
+                </div>
+                
+                <p class="tip-text" id="tipText">
+                    {% if tip %}
+                        {{ tip.description }}
+                    {% else %}
+                        Avoid sharing your home address, phone number, or travel plans publicly.
+                    {% endif %}
+                </p>
+                <a href="#" class="link-primary">Learn more <i class="fas fa-arrow-right"></i></a>
+                
+                <div class="tip-illustration">
+                    <!-- PRIVACY TIP ILLUSTRATION IMAGE TAG -->
+                    <img src="{% static 'account_hero_image.png' %}" alt="Privacy Tip Illustration">
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+    <script src="{% static 'home/home.js' %}"></script>
+</body>
+</html>

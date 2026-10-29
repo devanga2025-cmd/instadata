@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U Day - Create Post</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'create_post/post.css' %}">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ================= LEFT SIDEBAR ================= -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <img src="{% static 'logo.png' %}" alt="U Day Logo" class="logo-img">
+                <h1>U Day</h1>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="{% url 'home' %}" class="nav-item"><i class="fas fa-home"></i> Home</a>
+                <a href="#" class="nav-item active"><i class="fas fa-pen-fancy"></i> Create Post</a>
+                <a href="#" class="nav-item"><i class="far fa-file-alt"></i> My Posts</a>
+                <a href="#" class="nav-item"><i class="far fa-bookmark"></i> Saved Posts</a>
+                <a href="#" class="nav-item"><i class="fas fa-shield-alt"></i> Privacy Center</a>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i> Settings</a>
+                <a href="{% url 'logout' %}" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </nav>
+        </aside>
+
+        <!-- ================= MIDDLE FEED (CREATE POST) ================= -->
+        <main class="main-feed">
+            <!-- Top Navigation Bar -->
+            <header class="top-nav">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search posts, people...">
+                </div>
+                <div class="nav-icons">
+                    <i class="fas fa-home"></i>
+                    <i class="far fa-user"></i>
+                    <i class="far fa-bell"></i>
+                    <i class="far fa-comment-dots"></i>
+                    
+                    <div class="user-profile-mini">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.full_name }}" class="mini-avatar">
+                        {% else %}
+                        <div class="mini-avatar avatar-fallback">{{ user.full_name|default:"U"|first|upper }}</div>
+                        {% endif %}
+                        <span>Hi, {{ user.full_name|default:"User" }} <i class="fas fa-chevron-down"></i></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Create Post Form -->
+            <div class="card create-post-card">
+                <div class="card-header">
+                    <div class="header-left">
+                        {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture.url }}" alt="{{ user.full_name }}" class="avatar-medium-circle">
+                        {% else %}
+                        <div class="avatar-medium-circle avatar-fallback">{{ user.full_name|default:"U"|first|upper }}</div>
+                        {% endif %}
+                        <h4>Create a Post</h4>
+                        <p>Share your thoughts, moments and ideas with your audience.</p>
+                    </div>
+                    <div class="privacy-selector">
+                        <i class="fas fa-globe"></i> Public <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                {% if messages %}
+                <div class="messages-container" style="margin-bottom: 15px;">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" style="padding: 10px 15px; border-radius: 10px; margin-bottom: 8px; font-size: 14px; {% if message.tags == 'error' %}background:#fee2e2; color:#991b1b; border:1px solid #f87171;{% elif message.tags == 'warning' %}background:#fef3c7; color:#92400e; border:1px solid #fbbf24;{% else %}background:#dcfce7; color:#166534; border:1px solid #86efac;{% endif %}">
+                        <i class="fas {% if message.tags == 'error' %}fa-ban{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-check-circle{% endif %}"></i> {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form id="createPostForm" action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Content Input -->
+                    <div class="post-input-container">
+                        <label>What's on your mind, {{ user.full_name|default:"User" }}?</label>
+                        <textarea id="postContent" name="content" maxlength="500" placeholder="Share your thoughts...">{{ content }}</textarea>
+                        <div class="input-footer">
+                            <i class="far fa-smile"></i>
+                            <span id="contentCounter">0 / 500</span>
+                        </div>
+                    </div>
+
+                    <!-- Add to your post row -->
+                    <div class="add-to-post-row">
+                        <span>Add to your post</span>
+                        <div class="add-actions">
+                            <label for="imageUpload" class="add-action-btn"><i class="fas fa-image" style="color:#4CAF50;"></i> Photo / Video</label>
+                            <input type="file" id="imageUpload" name="media" accept="image/*,video/*" style="display:none;">
+                            
+                            <div class="add-action-btn"><i class="fas fa-map-marker-alt" style="color:#F44336;"></i> <input type="text" id="postLocation" name="location" placeholder="Add Location" class="inline-input"></div>
+                            <div class="add-action-btn"><i class="far fa-smile" style="color:#FFC107;"></i> <input type="text" id="postFeeling" name="feeling" placeholder="Feeling / Activity" class="inline-input"></div>
+                            <div class="add-action-btn"><i class="fas fa-ellipsis-h"></i> More</div>
+                        </div>
+                    </div>
+
+                    <!-- Drag and Drop Zone -->
+                    <div class="drag-drop-zone" id="dropZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div>
+                            <strong>Drag and drop photos or videos here</strong>
+                            <button type="button" class="btn-outline" onclick="document.getElementById('imageUpload').click()">Choose Files</button>
+                        </div>
+                    </div>
+
+                    <!-- Optional Location Input (Full Width) -->
+                    <div class="full-width-location">
+                        <label>Add Location (optional)</label>
+                        <div class="location-input-wrapper">
+                            <i class="fas fa-map-marker-alt" style="color:#999;"></i>
+                            <input type="text" name="location_full" placeholder="Search for a place...">
+                            <i class="fas fa-chevron-right" style="color:#ccc;"></i>
+                        </div>
+                    </div>
+
+                    <!-- AI Privacy Protection Toggle -->
+                    <div class="ai-privacy-box">
+                        <div class="ai-left">
+                            <i class="fas fa-shield-alt" style="color:#5841f5; font-size: 20px;"></i>
+                            <div>
+                                <strong>AI Privacy Protection</strong>
+                                <p>We'll scan your content for sensitive information to help keep you safe before posting.</p>
+                            </div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="aiToggle" checked>
+                            <label for="aiToggle"></label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn-outline-full">Save as Draft</button>
+                        <input type="hidden" name="action" id="postAction" value="analyze">
+                        <input type="hidden" name="pending_image_path" value="{{ pending_image_path }}">
+                        <input type="hidden" name="pending_video_path" value="{{ pending_video_path }}">
+                        <button type="submit" class="btn-primary-full" id="analyzePostBtn"><i class="fas fa-shield-alt"></i> Analyze & Post</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <!-- ================= RIGHT SIDEBAR ================= -->
+        <aside class="right-sidebar">
+            
+            <!-- Privacy Protection Card -->
+            <div class="card privacy-protection-card">
+                <div class="card-title-row">
+                    <div><i class="fas fa-shield-alt" style="color:#5841f5;"></i> Privacy Protection</div>
+                    <span class="badge-active">Active</span>
+                </div>
+                <p>We analyze your content before it's posted to help prevent accidental sharing of sensitive personal information.</p>
+                <a href="#" class="link-primary">Learn more <i class="fas fa-arrow-right"></i></a>
+                <div class="shield-illustration">
+                    <i class="fas fa-shield-alt fa-4x" style="color:#5841f5; opacity: 0.1;"></i>
+                </div>
+            </div>
+
+            <!-- Sidebar Privacy Score Card (Large) -->
+            <div class="card privacy-score-card-side">
+                <div class="card-title-row">
+                    <div><i class="fas fa-shield-alt" style="color:#5841f5;"></i> Your Privacy Score</div>
+                    <span class="badge-good">Good</span>
+                </div>
+                
+                <div class="score-container">
+                    <div class="score-circle-big" id="mainScoreCircle">
+                        <span id="mainScoreText">82</span>
+                        <span class="out-of">/100</span>
+                    </div>
+                    <div class="score-message-right">
+                        <p>Great job! You're sharing safely and responsibly.</p>
+                        <a href="#" class="link-primary">Improve Score <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posting Guidelines Card -->
+            <div class="card guidelines-card">
+                <div class="card-title-row">
+                    <div><i class="fas fa-list-ul" style="color:#5841f5;"></i> Posting Guidelines</div>
+                </div>
+                <ul class="guidelines-list">
+                    <li><i class="fas fa-check" style="color:#4CAF50;"></i> Be kind and respectful</li>
+                    <li><i class="fas fa-check" style="color:#4CAF50;"></i> Do not share misleading information</li>
+                    <li><i class="fas fa-check" style="color:#4CAF50;"></i> Protect your and others' privacy</li>
+                    <li><i class="fas fa-check" style="color:#4CAF50;"></i> Avoid sharing personal details</li>
+                </ul>
+                <a href="#" class="link-primary">View all guidelines <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+        </aside>
+    </div>
+
+    {% if scan_result %}
+    <div class="privacy-modal-overlay is-visible" id="privacyModal">
+        <div class="privacy-modal">
+            <div class="privacy-modal-header">
+                <h3>
+                    {% if scan_result.moderation_status == "Allowed" or scan_result.risk_level == "Low" or scan_result.risk_level == "SAFE" %}
+                    <i class="fas fa-shield-alt" style="color:#2e7d32;"></i> Privacy Scan Complete - Safe to Share
+                    {% elif scan_result.moderation_status == "Flagged for Review" or scan_result.risk_level == "Medium" or scan_result.risk_level == "MODERATE" %}
+                    <i class="fas fa-triangle-exclamation" style="color:#f59e0b;"></i> Content Flagged for Review
+                    {% else %}
+                    <i class="fas fa-ban" style="color:#dc2626;"></i> Content Blocked by Moderation Policy
+                    {% endif %}
+                </h3>
+                <span class="risk-level risk-{{ scan_result.risk_level|lower }}">{{ scan_result.risk_level|upper }} RISK</span>
+            </div>
+
+            <!-- MODERATION STATUS BANNER -->
+            <div class="moderation-status-card status-{{ scan_result.moderation_status|slugify }}">
+                <div class="status-icon">
+                    {% if scan_result.moderation_status == "Allowed" or scan_result.risk_level == "SAFE" or scan_result.risk_level == "Low" %}
+                    <i class="fas fa-check-circle" style="color:#2e7d32;"></i>
+                    {% elif scan_result.moderation_status == "Flagged for Review" or scan_result.risk_level == "Medium" %}
+                    <i class="fas fa-clock" style="color:#f59e0b;"></i>
+                    {% else %}
+                    <i class="fas fa-shield-xmark" style="color:#dc2626;"></i>
+                    {% endif %}
+                </div>
+                <div class="status-content">
+                    <div class="status-title">Moderation Status: <strong>{{ scan_result.moderation_status|default:"Analyzed" }}</strong></div>
+                    <div class="status-desc">{{ scan_result.status_message|default:"Content evaluated across harmful, explicit, violent, sensitive, and inappropriate categories." }}</div>
+                </div>
+            </div>
+
+            <!-- RISK SCORE & LEVEL METER -->
+            <div class="score-progress-container">
+                <div class="score-header-row">
+                    <strong>Risk Score (0–100):</strong>
+                    <span style="font-weight:700; font-size:16px;">{{ scan_result.risk_score }}/100</span>
+                </div>
+                <div class="score-bar-wrapper">
+                    <div class="score-bar-fill score-{{ scan_result.risk_level|lower }}" style="width: {% if scan_result.risk_score == 0 %}3{% else %}{{ scan_result.risk_score }}{% endif %}%;"></div>
+                </div>
+            </div>
+
+            {% if scan_result.frames_analyzed %}
+            <div class="video-meta-badge">
+                <i class="fas fa-film"></i> Video Moderation: {{ scan_result.frames_analyzed }} video key frames analyzed across timeline
+            </div>
+            {% endif %}
+
+            {% if safe_message %}
+            <p class="safe-message"><i class="fas fa-check"></i> Your content meets community safety guidelines and is safe to publish.</p>
+            {% endif %}
+
+            <div class="privacy-section">
+                <h4>Detected Issues & Moderation Findings</h4>
+                {% if scan_result.detections %}
+                <div class="risk-list">
+                    {% for risk in scan_result.detections %}
+                    <div class="risk-item">
+                        <div class="risk-item-header">
+                            <div>
+                                {% if risk.group %}
+                                <span class="group-tag group-{{ risk.group|lower }}">{{ risk.group }}</span>
+                                {% endif %}
+                                <strong>{{ risk.risk_type }}</strong>
+                            </div>
+                            <span class="risk-level risk-{{ risk.severity|lower }}">{{ risk.severity }}</span>
+                        </div>
+                        <div class="risk-item-detail">
+                            <span>{{ risk.masked_value }}</span>
+                            <span class="source-tag">
+                                {% if risk.source == "video" %}
+                                <i class="fas fa-film"></i> Video{% if risk.timestamp %} · {{ risk.timestamp }}{% endif %}
+                                {% elif risk.source == "image" %}
+                                <i class="fas fa-image"></i> Photo
+                                {% else %}
+                                <i class="fas fa-align-left"></i> Text
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if risk.description %}
+                        <p class="issue-desc">{{ risk.description }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="muted-text"><i class="fas fa-check-circle" style="color:#2e7d32;"></i> No harmful, explicit, violent, sensitive, or inappropriate content detected.</p>
+                {% endif %}
+            </div>
+
+            {% if scan_result.possible_misuse %}
+            <div class="privacy-section">
+                <h4>Possible Misuse</h4>
+                <ul>
+                    {% for misuse in scan_result.possible_misuse %}
+                    <li>{{ misuse }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="privacy-section">
+                <h4>Recommendations</h4>
+                <ul>
+                    {% for risk in scan_result.detections %}
+                    <li>{{ risk.recommendation }}</li>
+                    {% empty %}
+                    <li>Your post looks safe to publish.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="privacy-modal-actions">
+                <button type="button" class="btn-outline-full" id="editPostBtn">Edit Post</button>
+                {% if has_protectable_image %}
+                <button type="button" class="btn-outline-full" data-action="protect_image">Protect Image</button>
+                {% endif %}
+                {% if has_image_risks %}
+                <button type="button" class="btn-outline-full" id="chooseAnotherImageBtn">Choose Another Image</button>
+                {% endif %}
+                <button type="button" class="btn-outline-full" data-action="remove_sensitive">Remove Sensitive Data</button>
+                <button type="button" class="btn-outline-full" data-action="analyze">Recheck</button>
+                <button type="button" class="btn-outline-full" id="cancelModalBtn">Cancel</button>
+                {% if can_publish %}
+                <button type="button" class="btn-primary-full" data-action="publish"><i class="fas fa-paper-plane"></i> Publish Post</button>
+                {% elif is_review or scan_result.moderation_status == "Flagged for Review" %}
+                <button type="button" class="btn-warning-full" data-action="publish_under_review"><i class="fas fa-clock"></i> Submit for Review</button>
+                <button type="button" class="btn-primary-full" disabled>Posting Blocked</button>
+                {% else %}
+                <button type="button" class="btn-primary-full" disabled>Posting Blocked</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script src="{% static 'create_post/post.js' %}"></script>
+</body>
+</html>

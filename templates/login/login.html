@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U Day - Log In</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'login/login.css' %}">
+</head>
+<body>
+
+    {% if messages %}
+    <div class="toast-stack" aria-live="polite" aria-atomic="false">
+        {% for message in messages %}
+        <div class="toast toast-{{ message.tags }}" role="{{ message.tags|yesno:'alert,status' }}">
+            <span class="toast-icon"><i class="fas {% if 'success' in message.tags %}fa-circle-check{% elif 'error' in message.tags %}fa-circle-exclamation{% else %}fa-circle-info{% endif %}"></i></span>
+            <span>{{ message }}</span>
+            <button class="toast-close" type="button" aria-label="Dismiss notification" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container">
+        
+        <!-- ================= LEFT SIDE ================= -->
+        <div class="left-side">
+            <!-- Logo Area -->
+            <div class="logo-area">
+                <!-- PLACEHOLDER IMAGE TAG FOR LOGO -->
+                <img src="{% static 'logo.png' %}" alt="U Day Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>U Day</h1>
+                    <p>Share your day. <span>Protect</span> your privacy.</p>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <h2 class="main-headline">Share Your Moments.<br>Stay Connected.<br>Stay <span class="highlight">Protected.</span></h2>
+            <p class="sub-text">U Day is an AI-powered social media platform that lets you connect, share and express while we protect you from accidental sharing of sensitive personal information.</p>
+
+            <!-- 3D UI Illustrations Wrapper -->
+            <div class="illustration-wrapper">
+                <!-- PLACEHOLDER IMAGE TAG FOR MARKED 3D UI AREA -->
+                <!-- REPLACE THIS SRC WITH YOUR 3D ILLUSTRATION/CARDS IMAGE -->
+                <img src="{% static 'login_page_image.png' %}" alt="App UI Collage" class="main-illustration">
+                
+                <!-- Floating elements inside the wrapper to mimic the image layout -->
+                <div class="ai-badge">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>AI Privacy Protection Active</strong>
+                        <span>We analyze your content before you post to keep you safe.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= RIGHT SIDE (WHITE CARD) ================= -->
+        <div class="right-card">
+            <div class="form-header">
+                <h2>Welcome Back!</h2>
+                <p>Sign in to continue to U Day</p>
+            </div>
+
+            <!-- Form -->
+            <form id="loginForm" action="{% url 'login' %}" method="POST">
+                {% csrf_token %}
+                
+                <!-- Email or Username -->
+                <div class="input-group full">
+                    <label>Email or Username</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user"></i>
+                        <input type="text" name="login_input" placeholder="Enter your email or username" required>
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="input-group full">
+                    <label>Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+                    </div>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="actions-row">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember_me" checked> 
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-password">Forgot password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary">Log In</button>
+
+                <!-- OR Divider -->
+                <div class="divider">OR</div>
+
+                <!-- Google Sign Up -->
+                <button type="button" class="btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Continue with Google
+                </button>
+
+                <!-- Footer Create Account Link -->
+                <div class="footer-link">
+                    New to U Day? <a href="{% url 'register' %}">Create an account</a>
+                </div>
+            </form>
+
+            <!-- Privacy Footer -->
+            <div class="privacy-footer">
+                <div class="privacy-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="privacy-text">
+                    <h4>Your privacy matters.</h4>
+                    <p>U Day analyzes content before posting to help prevent accidental sharing of sensitive personal information.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="{% static 'login/login.js' %}"></script>
+</body>
+</html>

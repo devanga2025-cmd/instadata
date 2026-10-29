@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>U Day - Create Account</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Linking CSS -->
+    <link rel="stylesheet" href="{% static 'account/account.css' %}">
+</head>
+<body>
+
+    {% if messages %}
+    <div class="toast-stack" aria-live="polite" aria-atomic="false">
+        {% for message in messages %}
+        <div class="toast toast-{{ message.tags }}" role="{{ message.tags|yesno:'alert,status' }}">
+            <span class="toast-icon"><i class="fas {% if 'success' in message.tags %}fa-circle-check{% elif 'error' in message.tags %}fa-circle-exclamation{% else %}fa-circle-info{% endif %}"></i></span>
+            <span>{{ message }}</span>
+            <button class="toast-close" type="button" aria-label="Dismiss notification" onclick="this.parentElement.remove()">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="container">
+        
+        <!-- ================= LEFT SIDE ================= -->
+        <div class="left-side">
+            <!-- Logo Area -->
+            <div class="logo-area">
+                <!-- PLACEHOLDER FOR YOUR LOGO IMAGE -->
+                <img src="{% static 'logo.png' %}" alt="U Day Logo" class="logo-img">
+                <div class="logo-text">
+                    <h1>U Day</h1>
+                    <p>Share your day. <span>Protect</span> your privacy.</p>
+                </div>
+            </div>
+
+            <!-- Headline -->
+            <h2 class="main-headline">Join U Day and <br>Start Sharing <br><span class="highlight">Safely</span>.</h2>
+            <p class="sub-text">Connect with friends, share moments and let our AI protection keep your personal information secure.</p>
+
+            <!-- Feature List -->
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="icon-circle"><i class="fas fa-shield-alt"></i></div>
+                    <div class="feature-text">
+                        <h4>AI Privacy Protection</h4>
+                        <p>We scan your content before it's posted to detect and prevent privacy risks.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon-circle"><i class="fas fa-user-friends"></i></div>
+                    <div class="feature-text">
+                        <h4>Connect & Share</h4>
+                        <p>Follow friends, share your moments and build real connections.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon-circle"><i class="fas fa-lock"></i></div>
+                    <div class="feature-text">
+                        <h4>Secure Messaging</h4>
+                        <p>Chat privately with end-to-end privacy and scam protection.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3D Illustration -->
+            <div class="illustration-wrapper">
+                <!-- PLACEHOLDER FOR YOUR 3D ILLUSTRATION -->
+                <img src="{% static 'account_hero_image.png' %}" alt="3D Characters" class="main-illustration">
+            </div>
+        </div>
+
+        <!-- ================= RIGHT SIDE (WHITE CARD) ================= -->
+        <div class="right-card">
+            <div class="form-header">
+                <h2>Create Your Account</h2>
+                <p>It's quick and easy to get started.</p>
+            </div>
+
+            <!-- Form -->
+            <form id="registerForm" action="{% url 'register' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Row 1: Full Name & Username -->
+                <div class="row">
+                    <div class="input-group half">
+                        <label>Full Name</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" name="full_name" placeholder="Enter your full name" required>
+                        </div>
+                    </div>
+                    <div class="input-group half">
+                        <label>Username</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-at"></i>
+                            <input type="text" name="username" placeholder="Choose a username" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="input-group full">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" placeholder="Enter your email address" required>
+                    </div>
+                </div>
+
+                <!-- Password with Strength Meter (Exact layout from image) -->
+                <div class="input-group full">
+                    <label>Password</label>
+                    <div class="password-container">
+                        <div class="password-input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Create a password" required>
+                            <i class="fas fa-eye toggle-password" onclick="togglePassword('password', this)"></i>
+                        </div>
+                        <div class="strength-wrapper">
+                            <span class="strength-label">Password Strength</span>
+                            <div class="strength-bar-wrapper">
+                                <div class="strength-track">
+                                    <div id="strengthFill" class="strength-fill"></div>
+                                </div>
+                                <span id="strengthText" class="strength-status">Strong</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="input-group full">
+                    <label>Confirm Password</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm your password" required>
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('confirm_password', this)"></i>
+                    </div>
+                </div>
+
+                <!-- Date of Birth -->
+                <div class="input-group full">
+                    <label>Date of Birth (Optional)</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" name="date_of_birth">
+                    </div>
+                </div>
+
+                <!-- Profile Picture -->
+                <div class="input-group full">
+                    <label>Profile Picture (Optional)</label>
+                    <div class="file-upload-wrapper">
+                        <div class="file-icon"><i class="fas fa-upload"></i></div>
+                        <div class="file-text">
+                            <strong>Upload a profile picture</strong>
+                            <span>JPG, PNG up to 5MB</span>
+                        </div>
+                        <input type="file" name="profile_picture" accept="image/png, image/jpeg">
+                    </div>
+                </div>
+
+                <!-- Terms -->
+                <div class="terms">
+                    <input type="checkbox" id="terms" name="agreed_to_terms" required>
+                    <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary">Create Account</button>
+
+                <!-- OR Divider -->
+                <div class="divider">OR</div>
+
+                <!-- Google Sign Up -->
+                <button type="button" class="btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Sign up with Google
+                </button>
+
+                <!-- Footer Login Link -->
+                <div class="footer-link">
+                    Already have an account? <a href="{% url 'login' %}">Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Linking JS -->
+    <script src="{% static 'account/account.js' %}"></script>
+</body>
+</html>
